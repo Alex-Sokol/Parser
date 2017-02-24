@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DAL;
-using DAL.Interfaces;
+using DAL.Entities;
 using HtmlAgilityPack;
 
 namespace SiteParser.Interfaces
@@ -13,8 +12,6 @@ namespace SiteParser.Interfaces
         List<string> GetLinks(HtmlDocument doc, Uri mainUrl);
 
         double GetSize(HtmlDocument doc);
-
-        List<T> GetContent<T>(HtmlDocument doc, string tag, string atribute);
 
         List<Image> GetImages(HtmlDocument doc);
 

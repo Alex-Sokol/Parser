@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-using DAL;
-using DAL.Interfaces;
+using DAL.Entities;
 using HtmlAgilityPack;
 using SiteParser.Interfaces;
 
@@ -50,6 +49,39 @@ namespace SiteParser
             return urls;
         }
 
+        public double GetSize(HtmlDocument doc)
+        {
+            return Encoding.Unicode.GetByteCount(doc.DocumentNode.OuterHtml);
+        }
+
+        public List<Image> GetImages(HtmlDocument doc)
+        {
+            var imageNodes = doc.DocumentNode.SelectNodes("//img");
+            if (imageNodes == null)
+                return null;
+
+            var images = new List<Image>();
+
+            foreach (var item in imageNodes)
+                images.Add(new Image {SourseLink = item.Attributes["src"].Value});
+
+            return images;
+        }
+
+        public List<CssFile> GetCssFiles(HtmlDocument doc)
+        {
+            var styles = doc.DocumentNode.SelectNodes("/html/head/link[@rel='stylesheet']");
+            if (styles == null)
+                return null;
+
+            var css = new List<CssFile>();
+
+            foreach (var item in styles)
+                css.Add(new CssFile {SourseLink = item.Attributes["href"].Value});
+
+            return css;
+        }
+
         private string CleanLink(string link, Uri mainUrl)
         {
             // if empty link
@@ -76,55 +108,6 @@ namespace SiteParser
                 url = mainUrl + link;
 
             return url;
-        }
-
-        public double GetSize(HtmlDocument doc)
-        {
-            return Encoding.Unicode.GetByteCount(doc.DocumentNode.OuterHtml);
-        }
-
-        //get list of Images
-
-        public List<T> GetContent<T>(HtmlDocument doc, string tag, string atribute)
-        {
-            var contentNodes = doc.DocumentNode.SelectNodes(tag);
-            if (contentNodes == null)
-                return null;
-
-            var content = new List<T>();
-
-            foreach (var item in contentNodes)
-                content.Add((T)Activator.CreateInstance(typeof(T), item.Attributes[atribute].Value));
-
-            return content;
-        }
-        public List<Image> GetImages(HtmlDocument doc)
-        {
-            var imageNodes = doc.DocumentNode.SelectNodes("//img");
-            if (imageNodes == null)
-                return null;
-
-            var images = new List<Image>();
-
-            foreach (var item in imageNodes)
-                images.Add(new Image { SourseLink =  item.Attributes["src"].Value});
-
-            return images;
-        }
-
-        // get list of css files
-        public List<CssFile> GetCssFiles(HtmlDocument doc)
-        {
-            var styles = doc.DocumentNode.SelectNodes("/html/head/link[@rel='stylesheet']");
-            if (styles == null)
-                return null;
-
-            var css = new List<CssFile>();
-            
-            foreach (var item in styles)
-                css.Add(new CssFile { SourseLink = item.Attributes["href"].Value});
-
-            return css;
         }
     }
 }

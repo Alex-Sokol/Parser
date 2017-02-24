@@ -1,4 +1,5 @@
 ﻿using System.Data.Entity;
+using DAL.Entities;
 
 namespace DAL
 {
@@ -9,11 +10,11 @@ namespace DAL
             Database.SetInitializer(new DbInitializer());
         }
 
-        //protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        //{
-        //    Database.SetInitializer<MyContext>(null);
-        //    base.OnModelCreating(modelBuilder);
-        //}
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            Database.SetInitializer<MyContext>(null);
+            base.OnModelCreating(modelBuilder);
+        }
 
         public MyContext(string name) : base(name)
         {

@@ -1,8 +1,7 @@
-﻿using DAL.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace DAL
+namespace DAL.Entities
 {
     public class Site
     {
@@ -18,6 +17,5 @@ namespace DAL
         public int Depth { get; set; }
 
         public virtual ICollection<Page> Pages { get; set; }
-        
     }
 }

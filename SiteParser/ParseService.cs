@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using DAL;
+using DAL.Entities;
 using DAL.Interfaces;
 using DAL.Repositories;
 using NLog;
@@ -14,19 +14,19 @@ namespace SiteParser
 {
     public class ParseService : IParseServise
     {
+        public static Logger Log;
         private readonly IParser _parser;
         private readonly ITreeBuilder _treeBuilder;
 
         private ActionBlock<SiteForParsing> _actionBlock;
-
-        public static Logger Log;
-        public bool IsParsing { get; set; }
 
         public ParseService(IParser parser, ITreeBuilder treeBuilder)
         {
             _parser = parser;
             _treeBuilder = treeBuilder;
         }
+
+        public bool IsParsing { get; set; }
 
         public void AddSiteForParsing(SiteForParsing site)
         {
@@ -47,15 +47,11 @@ namespace SiteParser
 
         public void Start()
         {
-            _actionBlock = new ActionBlock<SiteForParsing>(parsing =>
-            {
-                Run(parsing);
-            },
-
-             new ExecutionDataflowBlockOptions
-             {
-                 MaxDegreeOfParallelism = 1
-             });
+            _actionBlock = new ActionBlock<SiteForParsing>(parsing => { Run(parsing); },
+                new ExecutionDataflowBlockOptions
+                {
+                    MaxDegreeOfParallelism = 1
+                });
         }
 
         public void Run(SiteForParsing siteForParsing)
@@ -64,7 +60,7 @@ namespace SiteParser
             {
                 Log = LogManager.GetCurrentClassLogger();
 
-                Site site = new Site
+                var site = new Site
                 {
                     Url = siteForParsing.Url,
                     ExternalLinks = siteForParsing.ExternalLinks,
@@ -75,12 +71,12 @@ namespace SiteParser
                 SaveSiteToDb(site);
 
                 Log.Info($"Run parsing: {site.Url}");
-                Stopwatch time = new Stopwatch();
+                var time = new Stopwatch();
                 time.Start();
 
                 IsParsing = true;
                 _parser.Start(site, siteForParsing.NumberOfThreads);
-                Task save = new Task(SavePagesToDb);
+                var save = new Task(SavePagesToDb);
                 save.Start();
 
                 Task.WaitAll(_parser.Tasks);
@@ -91,7 +87,7 @@ namespace SiteParser
                 time.Stop();
 
                 Log.Info($"Total time: {time.ElapsedMilliseconds}");
-                Console.WriteLine($"Total Pages: {_parser.MainSite.Pages.Count} Time: {time.ElapsedMilliseconds}");
+                Console.WriteLine($@"Total Pages: {_parser.MainSite.Pages.Count} Time: {time.ElapsedMilliseconds}");
 
                 if (!siteForParsing.Tree) return;
 
@@ -111,7 +107,7 @@ namespace SiteParser
             {
                 Thread.Sleep(500);
 
-                List<Page> pages = new List<Page>();
+                var pages = new List<Page>();
                 lock (_parser.MainSite.Pages)
                 {
                     pages.AddRange(_parser.MainSite.Pages);
@@ -121,9 +117,7 @@ namespace SiteParser
                 using (IRepository<Page> db = new Repository<Page>("FirstAppDB"))
                 {
                     foreach (var page in pages)
-                    {
-                        db.AddOrUpdate(x => new { x.SiteId, x.Url }, page);
-                    }
+                        db.AddOrUpdate(x => new {x.SiteId, x.Url}, page);
 
                     db.Save();
                 }

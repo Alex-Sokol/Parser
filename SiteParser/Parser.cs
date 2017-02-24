@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using DAL;
+using DAL.Entities;
 using HtmlAgilityPack;
 using SiteParser.Interfaces;
 
@@ -13,6 +12,11 @@ namespace SiteParser
     {
         private readonly IPageManager _pageManager;
 
+        public Parser(IPageManager pageManager)
+        {
+            _pageManager = pageManager;
+        }
+
         public string Domain { get; set; }
         public ConcurrentHashSet<string> LinksUrl { get; set; }
         public ConcurrentQueue<Page> PageQueue { get; set; }
@@ -20,11 +24,6 @@ namespace SiteParser
         public int NumberOfThreads { get; set; }
         public Site MainSite { get; set; }
         public Task[] Tasks { get; set; }
-
-        public Parser(IPageManager pageManager)
-        {
-            _pageManager = pageManager;
-        }
 
         public void Start(Site site, int numberOfThreads)
         {
@@ -92,13 +91,13 @@ namespace SiteParser
                             ParentUrl = p.Url
                         });
             }
-            catch (Exception e)
+            catch
             {
                 //Console.WriteLine(e.Message);
             }
         }
 
-        // Add Page to the List
+        // Add Page to the List then save to DB
         private void AddPage(HtmlDocument doc, string url, decimal ms, int depth, bool isExternal, string parent)
         {
             lock (MainSite.Pages)
@@ -111,19 +110,17 @@ namespace SiteParser
                     IsExternal = isExternal,
                     Size = _pageManager.GetSize(doc),
                     CssFiles = _pageManager.GetCssFiles(doc),
-                    //Images = _pageManager.GetImages(doc),
-                    Images = _pageManager.GetContent<Image>(doc, "//img", "src"),
+                    Images = _pageManager.GetImages(doc),
                     SiteId = MainSite.Id,
                     ParentUrl = parent
                 });
-                Console.WriteLine($"{Task.CurrentId} - {depth} - {isExternal} - {url}\n--- {ms} ms");
+                Console.WriteLine($"{ms} ms - {depth} - {isExternal} - {url}");
             }
         }
 
-        // External link ?
         private bool IsExternal(string link)
         {
             return !link.Contains(Domain);
-        }        
+        }
     }
 }

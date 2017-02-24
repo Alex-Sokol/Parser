@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using DAL.Interfaces;
 
-namespace DAL
+namespace DAL.Entities
 {
     public class Image : IContent
     {

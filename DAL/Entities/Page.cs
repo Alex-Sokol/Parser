@@ -1,10 +1,8 @@
-﻿using DAL.Interfaces;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DAL
+namespace DAL.Entities
 {
     public class Page
     {
@@ -19,6 +17,7 @@ namespace DAL
         [StringLength(450)]
         [Index("UrlIndex")]
         public string Url { get; set; }
+
         public decimal Ping { get; set; }
         public double Size { get; set; }
         public int SiteId { get; set; }
@@ -31,6 +30,5 @@ namespace DAL
 
         public virtual ICollection<Image> Images { get; set; }
         public virtual ICollection<CssFile> CssFiles { get; set; }
-        
     }
 }

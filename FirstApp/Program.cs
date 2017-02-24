@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DAL;
+using DAL.Entities;
 using DAL.Interfaces;
 using DAL.Repositories;
 using SiteParser;
@@ -12,7 +12,7 @@ namespace FirstApp
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             var c = Container.For<AppRegistry>();
             var s = c.GetInstance<IParseServise>();
@@ -21,9 +21,9 @@ namespace FirstApp
             //{
             //    db.Create(new SiteForParsing
             //    {
-            //        Url = "https://wikipedia.org/",
+            //        Url = "https://www.google.com",
             //        ExternalLinks = false,
-            //        Depth = 1,
+            //        Depth = 2,
             //        NumberOfThreads = 10,
             //        Tree = true
             //    });
@@ -32,14 +32,15 @@ namespace FirstApp
 
             s.Start();
             //s.AddSiteForParsing("http://www.ok-studio.com.ua/", 10, false, 10);
-            //s.AddSiteForParsing("https://www.google.com", 1, false, 10);
-            //s.AddSiteForParsing("https://wikipedia.org/", 1, false, 10);
-            s.AddSiteForParsing("http://www.deezer.com/", 2, false, 10);
+            //s.AddSiteForParsing("https://www.google.com", 2, false, 10);
+            //s.AddSiteForParsing("https://wikipedia.org/", 5, false, 10);
+            //s.AddSiteForParsing("http://www.deezer.com/", 2, false, 10);
 
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("Main menu\nChoose the operation:\n 1. Parse site\n 2. Build tree\n 3. Show sites\n 4. Exit");
+                Console.WriteLine(
+                    "Main menu\nChoose the operation:\n 1. Parse site\n 2. Build tree\n 3. Show sites\n 4. Exit");
                 var key = Console.ReadLine();
 
                 switch (key)
@@ -67,27 +68,26 @@ namespace FirstApp
         private static void AddSite(IParseServise service)
         {
             while (true)
-            {
                 try
                 {
-                    Console.WriteLine("Input starting url");
-                    string url = Console.ReadLine();
+                    Console.WriteLine(@"Input starting url");
+                    var url = Console.ReadLine();
 
-                    Console.WriteLine("Input depth");
+                    Console.WriteLine(@"Input depth");
                     int depth;
                     int.TryParse(Console.ReadLine(), out depth);
 
-                    Console.WriteLine("Input number of threads");
+                    Console.WriteLine(@"Input number of threads");
                     int threads;
                     int.TryParse(Console.ReadLine(), out threads);
 
-                    Console.WriteLine("Parse external links? 1 - Yes; 2 -  No.");
-                    string ex = Console.ReadLine();
-                    bool external = ex == "1";
+                    Console.WriteLine(@"Parse external links? 1 - Yes; 2 -  No.");
+                    var ex = Console.ReadLine();
+                    var external = ex == "1";
 
                     service.AddSiteForParsing(url, depth, external, threads);
                     Console.Clear();
-                    Console.WriteLine("Site has been added to queue");
+                    Console.WriteLine(@"Site has been added to queue");
                     Console.ReadKey();
                     return;
                 }
@@ -96,7 +96,6 @@ namespace FirstApp
                     Console.WriteLine(e.Message);
                     Console.ReadKey();
                 }
-            }
         }
 
         private static void BuildTree()
@@ -112,7 +111,7 @@ namespace FirstApp
                 {
                     case "1":
                         Console.Clear();
-                        Console.WriteLine("Choose the site:");
+                        Console.WriteLine(@"Choose the site:");
 
                         var sites = GetListOfSites();
                         int id;
@@ -126,18 +125,18 @@ namespace FirstApp
                         {
                             tb.Build(res);
                             Console.Clear();
-                            Console.WriteLine("Complete!");
+                            Console.WriteLine(@"Complete!");
                             Console.ReadKey();
                         }
                         break;
                     case "2":
                         Console.Clear();
-                        Console.WriteLine("Input starting Url");
-                        string url = Console.ReadLine();
-                        
+                        Console.WriteLine(@"Input starting Url");
+                        var url = Console.ReadLine();
+
                         tb.Build(url);
                         Console.Clear();
-                        Console.WriteLine("Complete!");
+                        Console.WriteLine(@"Complete!");
                         Console.ReadKey();
                         break;
                     case "3":
@@ -156,10 +155,10 @@ namespace FirstApp
             }
             if (sites.Count == 0)
                 return null;
-            Console.WriteLine("#\tDepth\tLast update\t\tUrl");
+            Console.WriteLine(@"#	Depth	Last update		Url");
             Console.WriteLine(new string('-', 60));
             foreach (var site in sites)
-                Console.WriteLine($"{site.Id}\t{site.Depth}\t{site.LastUpdate}\t{site.Url}");
+                Console.WriteLine($@"{site.Id}	{site.Depth}	{site.LastUpdate}	{site.Url}");
 
             return sites;
         }
